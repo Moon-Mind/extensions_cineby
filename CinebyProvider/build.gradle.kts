@@ -2,7 +2,7 @@
 version = 1
 
 android {
-    namespace = "com.cineby"
+    namespace = "recloudstream.cineby"
 }
 
 cloudstream {
