@@ -1,6 +1,10 @@
 // Use an integer for version numbers
 version = 4
 
+android {
+    namespace = "recloudstream.dailymotion"
+}
+
 cloudstream {
     // All of these properties are optional, you can safely remove any of them.
 

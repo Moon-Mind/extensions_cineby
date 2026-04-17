@@ -1,6 +1,10 @@
 // Use an integer for version numbers
 version = 2
 
+android {
+    namespace = "recloudstream.twitch"
+}
+
 cloudstream {
     // All of these properties are optional, you can safely remove any of them.
 
