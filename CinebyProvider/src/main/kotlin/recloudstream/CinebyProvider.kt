@@ -2,6 +2,7 @@ package recloudstream
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import com.lagradost.cloudstream3.utils.StringUtils.encodeUri
 import org.jsoup.nodes.Element
 
 class CinebyProvider : MainAPI() {
@@ -22,7 +23,7 @@ class CinebyProvider : MainAPI() {
 
     override suspend fun getMainPage(
         page: Int,
-        request: MainPageRequest
+        request: MainPageRequest,
     ): HomePageResponse {
         val document = app.get(request.data + if (page > 1) "?page=$page" else "").document
         val home = document.select(".flw-item").mapNotNull {
@@ -48,7 +49,7 @@ class CinebyProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val url = "$mainUrl/search/$query"
+        val url = "$mainUrl/search/${query.encodeUri()}"
         val document = app.get(url).document
         return document.select(".flw-item").mapNotNull {
             it.toSearchResult()
@@ -58,9 +59,11 @@ class CinebyProvider : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst(".film-name")?.text()?.trim() ?: document.selectFirst("h2.heading-name")?.text()?.trim() ?: return null
-        val poster = fixUrlNull(document.selectFirst(".film-poster img")?.attr("src"))
+        val poster = fixUrlNull(document.selectFirst(".film-poster img")?.attr("data-src") ?: document.selectFirst(".film-poster img")?.attr("src"))
         val plot = document.selectFirst(".description, .detail-resume")?.text()?.trim()
-        val year = document.selectFirst(".fdi-item")?.text()?.trim()?.toIntOrNull()
+        val year = document.selectFirst(".fdi-item")?.text()?.let { 
+            Regex("\\d{4}").find(it)?.value?.toIntOrNull() 
+        }
         val type = if (url.contains("/tv/")) TvType.TvSeries else TvType.Movie
 
         return if (type == TvType.TvSeries) {
@@ -98,6 +101,6 @@ class CinebyProvider : MainAPI() {
         val document = app.get(data).document
         val iframe = document.selectFirst("iframe")?.attr("src") ?: return false
         
-        return loadExtractor(iframe, subtitleCallback, callback)
+        return loadExtractor(fixUrl(iframe), subtitleCallback, callback)
     }
 }
