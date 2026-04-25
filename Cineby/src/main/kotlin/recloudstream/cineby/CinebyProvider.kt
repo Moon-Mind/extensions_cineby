@@ -1,4 +1,4 @@
-package com.cineby
+package recloudstream.cineby
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
